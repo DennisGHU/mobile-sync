@@ -1,0 +1,45 @@
+<html>
+<head>
+
+<style>
+</style>
+</head>
+<body>
+<img id="view" src="sample_image.jpg" width="10%" height="10%" />
+
+<script type="text/javascript">
+
+// Get settings
+var screensHorizontal = {{ .HorScreens }};
+var screensVertical = {{ .VerScreens }};
+var DeviceID = {{ .Nid }};
+
+// Calculate image settings
+var xpos = (DeviceID%screensHorizontal);
+var ypos = Math.floor(DeviceID/screensHorizontal);
+var w = window.innerWidth;
+var h = window.innerHeight;
+
+// Scroll to correct position
+move();
+function move() {
+	var srcW = 1280;
+	var srcH = 720;
+
+	var newW = Math.ceil((w/(srcW/screensHorizontal))*srcW) + "px";
+	var newH = Math.ceil((h/(srcH/screensVertical))*srcH) + "px";
+
+	// Resize image
+	var yourImg = document.getElementById("view");
+	if(yourImg && yourImg.style) {
+		yourImg.style.width = newW;
+		yourImg.style.height = newH;
+	}
+
+	// Scroll
+	window.scrollTo(xpos*w, ypos*h); // values are x,y-offset
+}
+
+</script>
+
+</body>

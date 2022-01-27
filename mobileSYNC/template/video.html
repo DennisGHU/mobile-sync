@@ -1,0 +1,99 @@
+<html>
+<head>
+</head>
+<body>
+<h1 id="text"></h1>
+<video id="video" width="10%" height="10%" controls preload="auto">
+    <source src="sample_video.mp4" type="video/mp4">
+</video>
+
+
+<script>
+
+// Receive settings
+var screensHorizontal = {{ .HorScreens }};
+var screensVertical = {{ .VerScreens }};
+
+// DeviceID
+var id = {{ .Nid }};
+
+// Refresh video at refreshSec%==0
+var reSync = {{ .ReSync }};
+
+
+// Calculate scroll position
+var xpos = (id%screensHorizontal);
+var ypos = Math.floor(id/screensHorizontal);
+var w = window.innerWidth;
+var h = window.innerHeight;
+move();
+
+// Scale and move to correct position
+function move() {
+    // Resize video
+    var srcW = 1280;
+    var srcH = 720;
+    var newW = (w/(srcW/screensHorizontal))*srcW;
+    var newH = (h/(srcH/screensVertical))*srcH;
+    var video = document.getElementsByTagName("video")[0];
+    video.height = newH;
+    video.width = newW;
+
+    // Scroll to correct part
+    window.scrollTo(xpos*w, ypos*h); // values are x,y-offset
+}
+
+// Start playing video for the first time
+var dnow = new Date();
+var tnow = dnow.getSeconds();
+setTimeout(function () {
+    console.log("Starting video");
+    var vid = document.getElementById("video");
+    vid.play();
+    waitForSync();
+}, (reSync-(tnow%reSync))*1000);
+
+function Sync() {
+    // Fix scrolling
+    window.scrollTo(xpos*w, ypos*h); // values are x,y-offset
+
+    // Reset video from buffer
+    var vid = document.getElementById("video");
+    vid.pause();
+    vid.currentTime = 0;
+
+    // Fix scrolling
+    window.scrollTo(xpos*w, ypos*h); // values are x,y-offset
+
+    // Get unix time
+    var dnow = new Date();
+    var tnow = dnow.getSeconds();
+
+    setTimeout(function () {
+        vid.play();
+        waitForSync();
+    }, (reSync-(tnow%reSync))*1000);
+
+}
+
+
+function waitForSync() {
+    // Get current second
+    var date = new Date();
+    var tnow = date.getSeconds();
+
+    // Wait for sync and pause
+    setTimeout(function () {
+        var vid = document.getElementById("video");
+        // Reload
+        vid.currentTime = 1;
+        vid.pause();
+        //console.log("reloading");
+        Sync();
+    }, (reSync-(tnow%reSync))*1000-2000); // Stop 2 seconds earlier to catch sync loop
+}
+
+
+</script>
+
+</body>
